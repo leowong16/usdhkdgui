@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>USD/CNH 实时汇率</title>
+    <title>USD-HKD 实时汇率</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         /* 根变量定义 - 用于主题颜色和透明度 */
@@ -354,6 +354,35 @@
             background: rgba(16, 185, 129, 0.3);
         }
 
+        /* 右上角汇率类型指示器 */
+        .currency-type {
+            position: fixed;
+            top: 10px;
+            right: 0px;
+            font-size: 36px;
+            font-weight: 520;
+            padding: 0 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            height: 36px;
+            line-height: 36px;
+            z-index: 20;
+        }
+
+        .currency-type::before {
+            display: none;
+        }
+
+        .up .currency-type {
+            color: var(--accent-down);
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .down .currency-type {
+            color: var(--accent-up);
+            background: rgba(16, 185, 129, 0.3);
+        }
+
         /* 背景网格样式 */
         .background-grid {
             position: fixed;
@@ -384,6 +413,9 @@
             <div class="light-effect" id="light-effect-3"></div>
             <div class="exchange-rate" id="exchange-rate">加载中...</div>
         </div>
+        <div id="currency-type-container" class="down">
+            <span class="currency-type">USD-HKD</span>
+        </div>
     </div>
     <div class="time-display">
         <span class="time" id="update-time">加载中...</span>
@@ -403,9 +435,9 @@
         let isPageVisible = true;
         let fetchInterval;
         const MAX_CONSECUTIVE_FAILURES = 3;
-        const FETCH_INTERVAL = 5000;
+        const FETCH_INTERVAL = 10000;
 
-        const PROXY_URL = "https://bdfn.2504588133.workers.dev/";
+        const PROXY_URL = "https://bdfn4usdhkd.2504588133.workers.dev/";
 
         // 检测页面可见性变化
         document.addEventListener('visibilitychange', function () {
@@ -438,7 +470,7 @@
         function fetchExchangeRate() {
             if (!isPageVisible) return; // 页面不可见时不更新
 
-            const targetUrl = "https://finance.pae.baidu.com/vapi/v1/getquotation?group=huilv_minute&need_reverse_real=1&code=USDCNH";
+            const targetUrl = "https://finance.pae.baidu.com/vapi/v1/getquotation?group=huilv_minute&need_reverse_real=1&code=USDHKD";
             const url = PROXY_URL + targetUrl;
 
             var xhr = new XMLHttpRequest();
@@ -501,6 +533,7 @@
             const rateElement = document.getElementById("exchange-rate");
             const rateChangeElement = document.getElementById("rate-change");
             const rateContainer = document.querySelector(".rate-container");
+            const currencyTypeContainer = document.getElementById("currency-type-container");
             const lightEffects = [
                 document.getElementById("light-effect-1"),
                 document.getElementById("light-effect-2"),
@@ -605,10 +638,13 @@
 
             // 更新涨跌幅样式
             rateChangeElement.parentElement.classList.remove('up', 'down');
+            currencyTypeContainer.classList.remove('up', 'down');
             if (ratio > 0) {
                 rateChangeElement.parentElement.classList.add('up');
+                currencyTypeContainer.classList.add('up');
             } else if (ratio < 0) {
                 rateChangeElement.parentElement.classList.add('down');
+                currencyTypeContainer.classList.add('down');
             }
 
             lastRate = currentRate;
